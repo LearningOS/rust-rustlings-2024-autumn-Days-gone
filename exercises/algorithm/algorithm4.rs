@@ -3,7 +3,6 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -51,13 +50,56 @@ where
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
         //TODO
+        if self.root.is_none() {
+            self.root = Some(Box::new(TreeNode::new(value)));
+            return;
+        }
+
+        let current = self.root.as_mut().unwrap();
+        if value < current.value {
+            match current.left {
+                // pay attention to the ref here, which is usually used to get the reference of the value
+                Some(ref mut node) => {
+                    node.insert(value);
+                },
+                None => {
+                    current.left = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+        } else if value > current.value {
+            match current.right {
+                Some(ref mut node) => {
+                    node.insert(value);
+                },
+                None => {
+                    current.right = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+        } else {
+            // if the value is equal to the current node, do nothing
+        }
     }
 
     // Search for a value in the BST
-    fn search(&self, value: T) -> bool {
+    fn search(&self, value: T) -> bool 
+    {
         //TODO
-        true
+        let mut current = self.root.as_ref();
+        let mut found = false;
+        while current.is_some() {
+            // println!("current: {}", current.unwrap().value);
+            if value < current.unwrap().value {
+                current = current.unwrap().left.as_ref();
+            } else if value > current.unwrap().value {
+                current = current.unwrap().right.as_ref();
+            } else {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
+
 }
 
 impl<T> TreeNode<T>
@@ -67,6 +109,27 @@ where
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
         //TODO
+        if value < self.value {
+            match self.left {
+                Some(ref mut node) => {
+                    node.insert(value);
+                },
+                None => {
+                    self.left = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+        } else if value > self.value {
+            match self.right {
+                Some(ref mut node) => {
+                    node.insert(value);
+                },
+                None => {
+                    self.right = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+        } else {
+            // if the value is equal to the current node, do nothing
+        }
     }
 }
 
