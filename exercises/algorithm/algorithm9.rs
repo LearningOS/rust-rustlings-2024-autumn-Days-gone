@@ -1,11 +1,11 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::fmt::Display;
 
 pub struct Heap<T>
 where
@@ -36,8 +36,33 @@ where
         self.len() == 0
     }
 
-    pub fn add(&mut self, value: T) {
-        //TODO
+    pub fn debug(&self, info: &str)
+    where
+        T: Display,
+    {
+        println!("---{}---", info);
+        print!("[");
+        for i in 1..=self.count {
+            if i == self.count {
+                print!("{}", self.items[i]);
+            } else {
+                print!("{},", self.items[i]);
+            }
+        }
+        println!("]");
+        println!("---END---\n");
+    }
+
+    pub fn add(&mut self, value: T)
+    where
+        T: Display,
+    {
+        //TODO // 4 2 9 11
+        self.items.push(value);
+        self.count += 1;
+
+        self.up(self.count);
+        self.debug("ADD");
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +83,40 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        idx
+    }
+
+    fn up(&mut self, mut idx: usize) {
+        while idx > 0 && idx / 2 > 0 {
+            let p_idx = idx / 2;
+            let change = (self.comparator)(&self.items[idx], &self.items[p_idx]);
+            if change {
+                self.items.swap(idx, p_idx);
+                idx = p_idx;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn down(&mut self, mut idx: usize) {
+        while idx * 2 <= self.count {
+            // check whether the right child exist
+            let mut f_chd = 0;
+            let  l_chd = idx * 2;
+            let  r_chd = if idx * 2 < self.count { idx * 2 + 1 } else { 0 };
+            if r_chd == 0 {
+                f_chd = l_chd;
+            } else {
+                f_chd = if (self.comparator)(&self.items[l_chd], &self.items[r_chd]) {
+                    l_chd
+                } else {
+                    r_chd
+                };
+                self.items.swap(idx, f_chd);
+            }
+            idx = f_chd;
+        }
     }
 }
 
@@ -79,13 +137,27 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Clone
 {
     type Item = T;
 
-    fn next(&mut self) -> Option<T> {
+    fn next(&mut self) -> Option<T>
+    where
+        T: Clone,
+    {
         //TODO
-		None
+        if self.count == 0 {
+            return None;
+        } else {
+            let result = self.items[1].clone();
+            self.items.swap(1, self.count);
+
+            // delete the last
+            self.count -= 1;
+            self.items.pop();
+            self.down(1);
+            Some(result)
+        }
     }
 }
 
@@ -140,6 +212,7 @@ mod tests {
     #[test]
     fn test_max_heap() {
         let mut heap = MaxHeap::new();
+        heap.debug("OUT");
         heap.add(4);
         heap.add(2);
         heap.add(9);
